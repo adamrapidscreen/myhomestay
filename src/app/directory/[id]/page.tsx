@@ -32,16 +32,16 @@ export default async function HomestayDetailsPage({
       {/* Back link */}
       <a
         href="/directory"
-        className="inline-flex items-center gap-2 text-sm font-medium text-muted hover:text-primary transition-colors mb-8 group"
+        className="inline-flex items-center gap-2 text-sm font-medium text-muted hover:text-primary transition-colors duration-200 mb-8"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 group-hover:-translate-x-1 transition-transform">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
           <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
         </svg>
         Back to all homestays
       </a>
 
       {/* Hero image */}
-      <div className="relative w-full h-64 sm:h-80 md:h-[440px] rounded-2xl overflow-hidden mb-10 shadow-[0_8px_40px_rgba(0,0,0,0.12)]">
+      <div className="relative w-full h-64 sm:h-80 md:h-[480px] rounded-lg overflow-hidden mb-10">
         <Image
           src={homestay.image}
           alt={homestay.name}
@@ -50,15 +50,15 @@ export default async function HomestayDetailsPage({
           sizes="(max-width: 768px) 100vw, 800px"
           priority
         />
-        {/* Gradient overlay at bottom */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
       </div>
 
       {/* Key info header */}
       <div className="mb-10">
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
           <div>
-            <h1 className="text-3xl sm:text-4xl font-extrabold mb-2">{homestay.name}</h1>
+            <h1 className="font-[family-name:var(--font-playfair)] text-3xl sm:text-4xl font-bold mb-2">
+              {homestay.name}
+            </h1>
             <p className="text-muted text-lg flex items-center gap-2">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-primary">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
@@ -67,8 +67,8 @@ export default async function HomestayDetailsPage({
               {homestay.location}
             </p>
           </div>
-          <div className="bg-gradient-to-br from-accent/5 to-accent/10 border border-accent/15 rounded-2xl px-6 py-4 shadow-sm">
-            <span className="text-3xl font-extrabold text-accent">
+          <div className="bg-sand-light rounded-lg px-5 py-3">
+            <span className="text-3xl font-bold text-accent">
               RM{homestay.price}
             </span>
             <span className="text-muted text-sm"> /night</span>
@@ -76,35 +76,41 @@ export default async function HomestayDetailsPage({
         </div>
       </div>
 
-      {/* Description */}
-      <div className="mb-10 p-7 bg-white rounded-2xl border border-soft-border shadow-[0_2px_20px_rgba(0,0,0,0.04)]">
-        <h2 className="text-xl font-bold mb-3">About this place</h2>
+      {/* Description — no card wrapping, editorial style */}
+      <div className="mb-12">
+        <h2 className="font-[family-name:var(--font-playfair)] text-xl font-semibold mb-3">
+          About this place
+        </h2>
         <p className="text-muted leading-relaxed text-[15px]">{homestay.description}</p>
       </div>
 
       {/* Facilities */}
-      <div className="mb-10">
-        <h2 className="text-xl font-bold mb-5">Facilities</h2>
+      <div className="mb-12">
+        <h2 className="font-[family-name:var(--font-playfair)] text-xl font-semibold mb-5">
+          Facilities
+        </h2>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {homestay.facilities.map((facility) => (
             <div
               key={facility}
-              className="flex items-center gap-3 p-4 bg-white rounded-xl border border-soft-border shadow-[0_2px_10px_rgba(0,0,0,0.03)] hover:shadow-[0_4px_20px_rgba(14,165,233,0.08)] hover:-translate-y-0.5 transition-all duration-200"
+              className="flex items-center gap-3 p-3 bg-surface rounded-lg border border-soft-border"
             >
-              <div className="w-9 h-9 bg-gradient-to-br from-primary/15 to-primary/5 rounded-lg flex items-center justify-center flex-shrink-0">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 text-primary">
+              <div className="w-8 h-8 bg-sand-light rounded-md flex items-center justify-center flex-shrink-0">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 text-sand">
                   <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
                 </svg>
               </div>
-              <span className="text-sm font-semibold">{facility}</span>
+              <span className="text-sm font-medium">{facility}</span>
             </div>
           ))}
         </div>
       </div>
 
       {/* Available dates */}
-      <div className="mb-14 p-7 bg-gradient-to-br from-primary/5 to-primary/10 border border-primary/15 rounded-2xl">
-        <h2 className="text-xl font-bold mb-3">Availability</h2>
+      <div className="mb-14 p-5 bg-surface border border-soft-border rounded-lg">
+        <h2 className="font-[family-name:var(--font-playfair)] text-xl font-semibold mb-3">
+          Availability
+        </h2>
         <p className="text-muted flex items-center gap-2.5">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-primary">
             <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
@@ -114,12 +120,12 @@ export default async function HomestayDetailsPage({
       </div>
 
       {/* WhatsApp contact button — sticky on mobile */}
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-white/80 backdrop-blur-md border-t border-soft-border sm:static sm:p-0 sm:bg-transparent sm:backdrop-blur-none sm:border-0 z-40">
+      <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-soft-border sm:static sm:p-0 sm:bg-transparent sm:border-0 z-40">
         <a
           href={whatsappUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center justify-center gap-3 w-full sm:w-auto sm:inline-flex px-8 py-4 bg-green-500 hover:bg-green-600 text-white font-bold rounded-xl shadow-[0_8px_30px_rgba(34,197,94,0.3)] hover:shadow-[0_12px_40px_rgba(34,197,94,0.4)] hover:-translate-y-1 transition-all duration-300 text-lg"
+          className="flex items-center justify-center gap-3 w-full sm:w-auto sm:inline-flex px-8 py-4 bg-green-500 hover:bg-green-600 text-white font-bold rounded-lg shadow-sm transition-colors duration-200 text-lg"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"

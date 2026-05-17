@@ -1,11 +1,17 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Playfair_Display } from "next/font/google";
 import Image from "next/image";
 import "./globals.css";
 
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
+});
+
+const playfair = Playfair_Display({
+  variable: "--font-playfair",
+  subsets: ["latin"],
+  weight: ["400", "600", "700", "800"],
 });
 
 export const metadata: Metadata = {
@@ -19,10 +25,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${inter.variable} h-full`}>
+    <html lang="en" className={`${inter.variable} ${playfair.variable} h-full`}>
       <body className="min-h-full flex flex-col bg-background text-foreground font-sans antialiased">
         {/* Header */}
-        <header className="sticky top-0 z-50 w-full bg-white/80 backdrop-blur-md border-b border-soft-border">
+        <header className="sticky top-0 z-50 w-full bg-white border-b border-soft-border">
           <nav className="max-w-6xl mx-auto px-6 py-2 flex items-center justify-between">
             <a href="/" className="relative flex h-10 w-48 items-center gap-2 overflow-visible">
               <Image
@@ -36,7 +42,7 @@ export default function RootLayout({
             </a>
             <a
               href="/directory"
-              className="text-sm font-medium text-muted hover:text-primary px-4 py-2 rounded-lg hover:bg-primary/5 transition-all"
+              className="text-sm font-medium text-muted hover:text-primary px-4 py-2 rounded-lg transition-colors duration-200"
             >
               Browse Homestays
             </a>
@@ -47,7 +53,7 @@ export default function RootLayout({
         <main className="flex-1">{children}</main>
 
         {/* Footer */}
-        <footer className="w-full border-t border-soft-border bg-white/50">
+        <footer className="w-full border-t border-soft-border bg-surface">
           <div className="max-w-6xl mx-auto px-6 py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
             <span className="text-sm text-muted">
               MyHomestay — Find your perfect homestay
