@@ -26,3 +26,6 @@ Thumbs.db
 coverage/
 test-results/
 playwright-report/
+
+# agent / atelier scratch
+.tmp/

@@ -2,6 +2,12 @@
 
 This file is the repo-local doctrine for MyHomestay.
 
+## Release Marker
+
+Current version: `Beta 0.10` (`package.json` `0.10.0`).
+
+Release notes live under `docs/releases/`.
+
 ## Current Product Truth
 
 MyHomestay is being treated as a greenfield project with the product spine, product brief, PRD-Lite, brand/UX system, architecture blueprint, and MVP build spec drafted.

@@ -1,0 +1,72 @@
+@import "tailwindcss";
+
+@theme {
+  /* Color tokens — Kampung Quiet Ledger Hybrid */
+  --color-ink: #1e211b;
+  --color-muted-ink: #62665a;
+  --color-paper: #fbfaf5;
+  --color-rice: #f3efe4;
+  --color-stone: #d8d1c3;
+  --color-leaf: #2f6b4f;
+  --color-deep-leaf: #214b39;
+  --color-river: #2f5f8f;
+  --color-clay: #b66a3c;
+  --color-sun: #d9a441;
+  --color-danger: #a33a32;
+
+  /* Typography */
+  --font-display: var(--font-fraunces), "Fraunces", ui-serif, Georgia, serif;
+  --font-sans: var(--font-inter), "Inter", ui-sans-serif, system-ui, sans-serif;
+
+  /* Radius — kept tight per brand spec */
+  --radius-card: 8px;
+  --radius-control: 6px;
+
+  /* Layout widths */
+  --container-public: 1120px;
+  --container-form: 760px;
+  --container-reading: 720px;
+}
+
+@layer base {
+  html {
+    color-scheme: light;
+  }
+
+  body {
+    background-color: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-feature-settings: "ss01", "cv11";
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    letter-spacing: -0.01em;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-leaf);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  ::selection {
+    background-color: var(--color-leaf);
+    color: var(--color-paper);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
