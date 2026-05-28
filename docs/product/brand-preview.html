@@ -1,0 +1,941 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>MyHomestay Brand Preview</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --paper: #fbfaf5;
+        --surface: #ffffff;
+        --wash: #f3efe4;
+        --ink: #1e211b;
+        --muted: #62665a;
+        --primary: #2f6b4f;
+        --primary-deep: #214b39;
+        --accent: #b66a3c;
+        --info: #2f5f8f;
+        --premium: #d9a441;
+        --line: #d8d1c3;
+        --soft-line: rgba(30, 33, 27, 0.12);
+        --shadow: 0 18px 50px rgba(30, 33, 27, 0.08);
+        --radius: 8px;
+        --display: Georgia, "Times New Roman", serif;
+        --ui: "Segoe UI", Arial, sans-serif;
+      }
+
+      [data-route="artisan"] {
+        --paper: #fbf7ef;
+        --wash: #efe4d4;
+        --ink: #211f1a;
+        --muted: #6a6258;
+        --primary: #315f46;
+        --primary-deep: #254737;
+        --accent: #b7613f;
+        --info: #426b78;
+        --premium: #b88a3d;
+        --line: #d9cdbe;
+        --shadow: 0 18px 45px rgba(75, 48, 25, 0.1);
+      }
+
+      [data-route="stayflow"] {
+        --paper: #ffffff;
+        --wash: #f5f8fa;
+        --ink: #17201b;
+        --muted: #5d6870;
+        --primary: #276a8c;
+        --primary-deep: #1e526c;
+        --accent: #2e6b4e;
+        --info: #276a8c;
+        --premium: #d9a441;
+        --line: #dde3e1;
+        --shadow: 0 18px 45px rgba(23, 32, 27, 0.09);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        background: var(--paper);
+        color: var(--ink);
+        font-family: var(--ui);
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+        min-width: 320px;
+        overflow-x: hidden;
+        background:
+          linear-gradient(180deg, rgba(255, 255, 255, 0.54), rgba(255, 255, 255, 0) 360px),
+          var(--paper);
+      }
+
+      button,
+      input {
+        font: inherit;
+      }
+
+      button {
+        cursor: pointer;
+      }
+
+      .page {
+        max-width: 1320px;
+        margin: 0 auto;
+        padding: 28px;
+      }
+
+      .topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        min-height: 52px;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-width: 0;
+      }
+
+      .brand-mark {
+        display: grid;
+        flex: 0 0 34px;
+        width: 34px;
+        height: 34px;
+        place-items: center;
+        border: 1px solid var(--line);
+        border-radius: 7px;
+        background: var(--surface);
+        color: var(--primary);
+        font-family: var(--display);
+        font-size: 18px;
+        font-weight: 700;
+      }
+
+      .brand-name {
+        font-size: 15px;
+        font-weight: 750;
+        letter-spacing: 0;
+        white-space: nowrap;
+      }
+
+      .brand-meta {
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .route-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        gap: 8px;
+        max-width: 100%;
+      }
+
+      .route-tab {
+        flex: 0 1 auto;
+        min-width: 0;
+        min-height: 36px;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        padding: 0 13px;
+        background: rgba(255, 255, 255, 0.66);
+        color: var(--ink);
+        font-size: 13px;
+      }
+
+      .route-tab[aria-pressed="true"] {
+        border-color: var(--primary);
+        background: var(--primary);
+        color: #ffffff;
+      }
+
+      .hero {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(340px, 0.78fr);
+        gap: 40px;
+        align-items: end;
+        min-height: 520px;
+        padding: 64px 0 44px;
+      }
+
+      .eyebrow {
+        color: var(--primary);
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      h1,
+      h2,
+      h3,
+      p {
+        margin-top: 0;
+      }
+
+      h1 {
+        max-width: 760px;
+        margin-bottom: 18px;
+        font-family: var(--display);
+        font-size: clamp(48px, 7vw, 92px);
+        font-weight: 650;
+        letter-spacing: 0;
+        line-height: 0.96;
+        overflow-wrap: break-word;
+      }
+
+      .lede {
+        max-width: 680px;
+        margin-bottom: 28px;
+        color: var(--muted);
+        font-size: clamp(18px, 2vw, 23px);
+        line-height: 1.45;
+      }
+
+      .hero-actions,
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 42px;
+        border: 1px solid transparent;
+        border-radius: 7px;
+        padding: 0 16px;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 750;
+        white-space: nowrap;
+      }
+
+      .btn-primary {
+        background: var(--primary);
+        color: #ffffff;
+      }
+
+      .btn-primary:hover {
+        background: var(--primary-deep);
+      }
+
+      .btn-secondary {
+        border-color: var(--line);
+        background: var(--surface);
+        color: var(--ink);
+      }
+
+      .btn-whatsapp {
+        background: #1f8f55;
+        color: #ffffff;
+      }
+
+      .mood-panel {
+        overflow: hidden;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        background: var(--surface);
+        box-shadow: var(--shadow);
+      }
+
+      .mood-photo {
+        position: relative;
+        min-height: 260px;
+        background:
+          linear-gradient(180deg, rgba(0, 0, 0, 0.04), rgba(0, 0, 0, 0.32)),
+          url("https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=82") center/cover;
+      }
+
+      .mood-photo::after {
+        position: absolute;
+        inset: auto 18px 18px;
+        display: block;
+        height: 56px;
+        border: 1px solid rgba(255, 255, 255, 0.44);
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.18);
+        backdrop-filter: blur(12px);
+        content: "";
+      }
+
+      .mood-copy {
+        padding: 18px;
+      }
+
+      .mood-copy strong {
+        display: block;
+        margin-bottom: 6px;
+        font-family: var(--display);
+        font-size: 24px;
+      }
+
+      .mood-copy span {
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1.5;
+      }
+
+      .section {
+        padding: 42px 0;
+      }
+
+      .section-head {
+        display: flex;
+        align-items: end;
+        justify-content: space-between;
+        gap: 18px;
+        margin-bottom: 18px;
+      }
+
+      .section-head h2 {
+        margin-bottom: 0;
+        font-family: var(--display);
+        font-size: clamp(30px, 4vw, 46px);
+        font-weight: 640;
+        line-height: 1.04;
+        overflow-wrap: break-word;
+      }
+
+      .section-note {
+        max-width: 440px;
+        margin-bottom: 0;
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1.5;
+      }
+
+      .routes-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 14px;
+      }
+
+      .route-card {
+        min-height: 310px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 18px;
+        background: var(--surface);
+      }
+
+      .route-card h3 {
+        margin-bottom: 10px;
+        font-family: var(--display);
+        font-size: 27px;
+        line-height: 1.04;
+      }
+
+      .route-card p {
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1.55;
+      }
+
+      .swatches {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 6px;
+        margin: 18px 0;
+      }
+
+      .swatch {
+        height: 48px;
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        border-radius: 6px;
+      }
+
+      .route-pill {
+        display: inline-flex;
+        align-items: center;
+        min-height: 28px;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        padding: 0 10px;
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 750;
+      }
+
+      .preview-shell {
+        display: grid;
+        grid-template-columns: minmax(0, 0.95fr) minmax(360px, 1.05fr);
+        gap: 16px;
+        align-items: start;
+      }
+
+      .panel {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--surface);
+      }
+
+      .panel-pad {
+        padding: 18px;
+      }
+
+      .owner-card {
+        display: grid;
+        gap: 22px;
+        min-height: 520px;
+      }
+
+      .owner-hero {
+        display: grid;
+        gap: 16px;
+        align-content: start;
+        padding: 24px;
+        border-radius: 8px;
+        background: var(--wash);
+      }
+
+      .owner-hero h2 {
+        max-width: 420px;
+        margin-bottom: 0;
+        font-family: var(--display);
+        font-size: clamp(34px, 4vw, 54px);
+        font-weight: 650;
+        line-height: 1;
+      }
+
+      .owner-hero p {
+        max-width: 540px;
+        margin-bottom: 0;
+        color: var(--muted);
+        line-height: 1.55;
+      }
+
+      .step-box {
+        display: grid;
+        gap: 14px;
+      }
+
+      .step-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
+
+      .step-label {
+        color: var(--primary);
+        font-size: 12px;
+        font-weight: 850;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .save-state {
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .field {
+        display: grid;
+        gap: 7px;
+      }
+
+      .field label {
+        font-size: 13px;
+        font-weight: 800;
+      }
+
+      .field input {
+        width: 100%;
+        min-height: 44px;
+        border: 1px solid var(--line);
+        border-radius: 7px;
+        padding: 0 12px;
+        background: #ffffff;
+        color: var(--ink);
+      }
+
+      .field small {
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.45;
+      }
+
+      .dashboard-row {
+        display: grid;
+        grid-template-columns: minmax(120px, 1.2fr) 94px 86px 92px 108px;
+        gap: 10px;
+        align-items: center;
+        margin-top: 16px;
+        border-top: 1px solid var(--line);
+        padding-top: 14px;
+        font-size: 13px;
+      }
+
+      .dashboard-row strong {
+        display: block;
+        margin-bottom: 3px;
+      }
+
+      .dashboard-row span {
+        color: var(--muted);
+      }
+
+      .status {
+        display: inline-flex;
+        align-items: center;
+        min-height: 26px;
+        border-radius: 999px;
+        padding: 0 9px;
+        background: rgba(47, 107, 79, 0.12);
+        color: var(--primary);
+        font-size: 12px;
+        font-weight: 850;
+      }
+
+      .listing-stack {
+        display: grid;
+        gap: 14px;
+      }
+
+      .filter-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        padding: 10px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--wash);
+      }
+
+      .filter-chip {
+        display: inline-flex;
+        align-items: center;
+        min-height: 32px;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        padding: 0 10px;
+        background: var(--surface);
+        font-size: 12px;
+        font-weight: 760;
+      }
+
+      .listing-card {
+        display: grid;
+        grid-template-columns: 190px minmax(0, 1fr);
+        overflow: hidden;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--surface);
+      }
+
+      .listing-photo {
+        min-height: 220px;
+        background:
+          linear-gradient(180deg, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.22)),
+          url("https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=900&q=82") center/cover;
+      }
+
+      .listing-body {
+        display: grid;
+        gap: 14px;
+        padding: 17px;
+      }
+
+      .listing-title {
+        display: flex;
+        align-items: start;
+        justify-content: space-between;
+        gap: 12px;
+      }
+
+      .listing-title h3 {
+        margin-bottom: 5px;
+        font-family: var(--display);
+        font-size: 28px;
+        line-height: 1.04;
+      }
+
+      .listing-title p {
+        margin-bottom: 0;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .price {
+        color: var(--ink);
+        font-size: 14px;
+        font-weight: 850;
+        white-space: nowrap;
+      }
+
+      .badges {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 7px;
+      }
+
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        min-height: 28px;
+        border: 1px solid rgba(47, 107, 79, 0.24);
+        border-radius: 999px;
+        padding: 0 9px;
+        background: rgba(47, 107, 79, 0.09);
+        color: var(--primary);
+        font-size: 12px;
+        font-weight: 800;
+      }
+
+      .trust-strip {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 1px;
+        overflow: hidden;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--line);
+      }
+
+      .trust-item {
+        min-height: 82px;
+        padding: 12px;
+        background: var(--surface);
+      }
+
+      .trust-item span {
+        display: block;
+        margin-bottom: 5px;
+        color: var(--muted);
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+
+      .trust-item strong {
+        font-size: 14px;
+        line-height: 1.28;
+      }
+
+      .whatsapp-box {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        border: 1px solid rgba(31, 143, 85, 0.28);
+        border-radius: 8px;
+        padding: 14px;
+        background: rgba(31, 143, 85, 0.08);
+      }
+
+      .whatsapp-box p {
+        margin-bottom: 0;
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.45;
+      }
+
+      .footer-note {
+        margin: 26px 0 0;
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.5;
+      }
+
+      @media (max-width: 980px) {
+        .hero,
+        .preview-shell,
+        .routes-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .hero {
+          min-height: auto;
+          padding-top: 42px;
+        }
+      }
+
+      @media (max-width: 720px) {
+        .page {
+          padding: 18px;
+        }
+
+        .topbar,
+        .section-head {
+          align-items: stretch;
+          flex-direction: column;
+        }
+
+        .route-tabs {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          justify-content: flex-start;
+          width: 100%;
+        }
+
+        .route-tab {
+          width: 100%;
+        }
+
+        h1 {
+          font-size: 42px;
+        }
+
+        .listing-card {
+          grid-template-columns: 1fr;
+        }
+
+        .listing-photo {
+          min-height: 210px;
+        }
+
+        .listing-title {
+          flex-direction: column;
+        }
+
+        .dashboard-row,
+        .trust-strip {
+          grid-template-columns: 1fr;
+        }
+
+        .whatsapp-box {
+          align-items: stretch;
+          flex-direction: column;
+        }
+
+        .btn {
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body data-route="hybrid">
+    <main class="page">
+      <nav class="topbar" aria-label="Brand preview">
+        <div class="brand">
+          <div class="brand-mark">M</div>
+          <div>
+            <div class="brand-name">MyHomestay</div>
+            <div class="brand-meta">Brand route proof sheet</div>
+          </div>
+        </div>
+        <div class="route-tabs" aria-label="Preview route">
+          <button class="route-tab" type="button" data-target="hybrid" aria-pressed="true">Hybrid</button>
+          <button class="route-tab" type="button" data-target="quiet" aria-pressed="false">Quiet Ledger</button>
+          <button class="route-tab" type="button" data-target="artisan" aria-pressed="false">Rumah Artisan</button>
+          <button class="route-tab" type="button" data-target="stayflow" aria-pressed="false">Stayflow</button>
+        </div>
+      </nav>
+
+      <section class="hero">
+        <div>
+          <div class="eyebrow">Selected route</div>
+          <h1>Kampung calm, owner tools, direct WhatsApp trust.</h1>
+          <p class="lede">
+            A minimal Malaysian homestay operating system: dignified for owners, warm for travellers, and practical enough to become a real marketplace later.
+          </p>
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="#components">See components</a>
+            <a class="btn btn-secondary" href="#routes">Compare routes</a>
+          </div>
+        </div>
+        <aside class="mood-panel" aria-label="Mood preview">
+          <div class="mood-photo"></div>
+          <div class="mood-copy">
+            <strong>Hosted, not hectic.</strong>
+            <span>Photography carries warmth. The interface stays quiet so the owner, place, and WhatsApp handoff feel trustworthy.</span>
+          </div>
+        </aside>
+      </section>
+
+      <section class="section" id="routes">
+        <div class="section-head">
+          <h2>Three routes, one product spine.</h2>
+          <p class="section-note">
+            These are not clones of Apple, CBTL, or Agoda. They are translated ingredients: restraint, warmth, and travel utility.
+          </p>
+        </div>
+
+        <div class="routes-grid">
+          <article class="route-card">
+            <span class="route-pill">Apple restraint</span>
+            <h3>Kampung Quiet Ledger</h3>
+            <p>Best for owner onboarding, dashboard calm, and trust. This route makes MyHomestay feel like a clean online register rather than another noisy travel site.</p>
+            <div class="swatches" aria-label="Quiet Ledger colors">
+              <div class="swatch" style="background: #fbfaf5"></div>
+              <div class="swatch" style="background: #ffffff"></div>
+              <div class="swatch" style="background: #1e211b"></div>
+              <div class="swatch" style="background: #2f6b4f"></div>
+              <div class="swatch" style="background: #b66a3c"></div>
+            </div>
+            <p>Risk: too quiet if the public listing page does not get enough photo and copy warmth.</p>
+          </article>
+
+          <article class="route-card">
+            <span class="route-pill">Cafe warmth</span>
+            <h3>Rumah Artisan</h3>
+            <p>Best for hosted feeling, owner profile cards, and premium identity later. It adds craft without falling into rustic decoration.</p>
+            <div class="swatches" aria-label="Rumah Artisan colors">
+              <div class="swatch" style="background: #fbf7ef"></div>
+              <div class="swatch" style="background: #efe4d4"></div>
+              <div class="swatch" style="background: #211f1a"></div>
+              <div class="swatch" style="background: #315f46"></div>
+              <div class="swatch" style="background: #b7613f"></div>
+            </div>
+            <p>Risk: too beige if we let warmth overpower utility, green, white space, and sharp hierarchy.</p>
+          </article>
+
+          <article class="route-card">
+            <span class="route-pill">Travel utility</span>
+            <h3>Stayflow Malaysia</h3>
+            <p>Best for search, filters, listing comparison, and regional scale. It keeps the directory useful without making the MVP too marketplace-heavy.</p>
+            <div class="swatches" aria-label="Stayflow colors">
+              <div class="swatch" style="background: #ffffff"></div>
+              <div class="swatch" style="background: #f5f8fa"></div>
+              <div class="swatch" style="background: #17201b"></div>
+              <div class="swatch" style="background: #276a8c"></div>
+              <div class="swatch" style="background: #2e6b4e"></div>
+            </div>
+            <p>Risk: too generic if owner dignity and local trust details do not lead the product voice.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section" id="components">
+        <div class="section-head">
+          <h2>The MVP surface.</h2>
+          <p class="section-note">
+            The same small component set covers owner onboarding, public discovery, listing trust, and the WhatsApp handoff.
+          </p>
+        </div>
+
+        <div class="preview-shell">
+          <section class="panel panel-pad owner-card" aria-label="Owner onboarding preview">
+            <div class="owner-hero">
+              <div class="eyebrow">Owner setup</div>
+              <h2>Set up your homestay page.</h2>
+              <p>
+                Publish a clean public page, keep booking and payment on WhatsApp, and improve trust details as your listing grows.
+              </p>
+              <div class="actions">
+                <a class="btn btn-primary" href="#">Create listing</a>
+                <a class="btn btn-secondary" href="#">View sample page</a>
+              </div>
+            </div>
+
+            <div class="step-box">
+              <div class="step-top">
+                <span class="step-label">Step 1 of 4</span>
+                <span class="save-state">Draft saved</span>
+              </div>
+              <div class="field">
+                <label for="whatsapp">Owner WhatsApp number</label>
+                <input id="whatsapp" value="+60 12-345 6789" />
+                <small>This number will be used for traveller inquiries. MyHomestay does not process bookings or payments in the MVP.</small>
+              </div>
+              <div class="field">
+                <label for="display-name">Public owner display name</label>
+                <input id="display-name" value="Azman Homestay Admin" />
+              </div>
+            </div>
+
+            <div class="dashboard-row" aria-label="Dashboard row preview">
+              <div>
+                <strong>Seri Laman Melaka</strong>
+                <span>Last updated today</span>
+              </div>
+              <span class="status">Live</span>
+              <div><strong>82%</strong><span>Complete</span></div>
+              <div><strong>37</strong><span>WhatsApp</span></div>
+              <div><strong>Add photos</strong><span>Next action</span></div>
+            </div>
+          </section>
+
+          <section class="listing-stack" aria-label="Public listing preview">
+            <div class="filter-bar" aria-label="Directory filters">
+              <span class="filter-chip">Melaka</span>
+              <span class="filter-chip">8 guests</span>
+              <span class="filter-chip">Muslim-friendly</span>
+              <span class="filter-chip">Family stay</span>
+            </div>
+
+            <article class="listing-card">
+              <div class="listing-photo" role="img" aria-label="Modern homestay exterior"></div>
+              <div class="listing-body">
+                <div class="listing-title">
+                  <div>
+                    <h3>Seri Laman Melaka</h3>
+                    <p>Alor Gajah, Melaka</p>
+                  </div>
+                  <div class="price">RM280 - RM420</div>
+                </div>
+                <div class="badges">
+                  <span class="badge">Muslim-friendly</span>
+                  <span class="badge">Owner verified</span>
+                  <span class="badge">8 guests</span>
+                  <span class="badge">Parking</span>
+                </div>
+                <p class="section-note">
+                  A quiet kampung-modern stay with three rooms, family cooking space, and direct owner confirmation by WhatsApp.
+                </p>
+                <div class="actions">
+                  <a class="btn btn-whatsapp" href="#">WhatsApp owner</a>
+                  <a class="btn btn-secondary" href="#">View details</a>
+                </div>
+              </div>
+            </article>
+
+            <div class="trust-strip" aria-label="Listing trust facts">
+              <div class="trust-item">
+                <span>Owner</span>
+                <strong>Profile checked</strong>
+              </div>
+              <div class="trust-item">
+                <span>Updated</span>
+                <strong>Today</strong>
+              </div>
+              <div class="trust-item">
+                <span>Prayer</span>
+                <strong>Nearby surau</strong>
+              </div>
+              <div class="trust-item">
+                <span>Rules</span>
+                <strong>No parties</strong>
+              </div>
+            </div>
+
+            <div class="whatsapp-box">
+              <p><strong>Message preview:</strong> Hi, I found Seri Laman Melaka on MyHomestay. Is it available for my dates?</p>
+              <a class="btn btn-whatsapp" href="#">WhatsApp owner</a>
+            </div>
+          </section>
+        </div>
+
+        <p class="footer-note">
+          Preview note: route buttons above change the color system only. The selected product direction is the hybrid: Quiet Ledger structure, Rumah Artisan warmth, and Stayflow utility.
+        </p>
+      </section>
+    </main>
+
+    <script>
+      const tabs = Array.from(document.querySelectorAll(".route-tab"));
+      const body = document.body;
+
+      tabs.forEach((tab) => {
+        tab.addEventListener("click", () => {
+          const target = tab.dataset.target || "hybrid";
+          body.dataset.route = target;
+          tabs.forEach((item) => {
+            item.setAttribute("aria-pressed", String(item === tab));
+          });
+        });
+      });
+    </script>
+  </body>
+</html>
