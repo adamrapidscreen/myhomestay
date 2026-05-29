@@ -59,6 +59,21 @@ function PhotoTile({
   photo: ListingPhoto;
   className?: string;
 }) {
+  if (photo.src) {
+    return (
+      <figure
+        className={`relative overflow-hidden rounded-card border border-stone bg-rice ${className ?? ""}`}
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={photo.src}
+          alt={photo.alt || CATEGORY_LABELS[photo.category]}
+          className="h-full w-full object-cover"
+        />
+      </figure>
+    );
+  }
+
   return (
     <figure
       className={`relative flex w-full items-end overflow-hidden rounded-card border border-stone bg-rice p-3 ${className ?? ""}`}

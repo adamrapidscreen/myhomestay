@@ -128,8 +128,6 @@ export function validateListingBuilderInput(
       errors.maxPerNight = "Maximum cannot be less than minimum.";
     }
     if (input.houseRules.length === 0) errors.houseRules = "Add at least one house rule.";
-    if (input.photoCategories.length < 3)
-      errors.photoCategories = "Select at least 3 photo categories.";
   }
 
   return errors;

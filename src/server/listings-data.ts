@@ -390,3 +390,46 @@ export async function setListingStatus(
   if (!listing) return { ok: false, error: "Listing not found in this session." };
   return { ok: true, listing };
 }
+
+// ---------------------------------------------------------------------------
+// Photo metadata reads (owner-scoped via RLS through listing ownership)
+// ---------------------------------------------------------------------------
+
+export interface OwnerPhoto {
+  id: string;
+  objectPath: string;
+  category: ListingPhotoCategory;
+  sortOrder: number;
+}
+
+/**
+ * Photos for a listing, owner-scoped. RLS on listing_photos gates rows by
+ * parent-listing ownership, so this only returns rows the caller may see.
+ * Returns raw object paths; the caller mints signed URLs for display.
+ */
+export async function getListingPhotos(
+  listingId: string,
+): Promise<OwnerPhoto[]> {
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("listing_photos")
+    .select("id, src, category, sort_order")
+    .eq("listing_id", listingId)
+    .order("sort_order", { ascending: true });
+
+  if (error || !data) return [];
+  return (data as { id: string; src: string; category: string; sort_order: number }[]).map(
+    (r) => ({
+      id: r.id,
+      objectPath: r.src,
+      category: r.category as ListingPhotoCategory,
+      sortOrder: r.sort_order,
+    }),
+  );
+}
+
+/** Next sort_order for a listing's photos (max + 1, or 1 when empty). */
+export async function nextPhotoSortOrder(listingId: string): Promise<number> {
+  const photos = await getListingPhotos(listingId);
+  return photos.reduce((max, p) => Math.max(max, p.sortOrder), 0) + 1;
+}

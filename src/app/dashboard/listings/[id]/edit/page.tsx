@@ -2,10 +2,15 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireOwner } from "@/server/auth";
-import { findListingById } from "@/server/listings-data";
+import { findListingById, getListingPhotos } from "@/server/listings-data";
+import { getSignedPhotoUrl } from "@/server/listing-photos-storage";
 import { evaluateListingCompleteness } from "@/lib/listing-completeness";
 import { LISTING_STATUS_DISPLAY } from "@/lib/listing-status-display";
 import { ListingBuilder } from "../../listing-builder";
+import {
+  PhotoManager,
+  type PhotoManagerItem,
+} from "@/components/dashboard/photo-manager";
 
 interface EditListingPageParams {
   params: Promise<{ id: string }>;
@@ -27,6 +32,16 @@ export default async function EditListingPage({ params }: EditListingPageParams)
 
   const completeness = evaluateListingCompleteness(listing);
   const status = LISTING_STATUS_DISPLAY[listing.status];
+
+  const ownerPhotos = await getListingPhotos(id);
+  const photos: PhotoManagerItem[] = await Promise.all(
+    ownerPhotos.map(async (p) => ({
+      id: p.id,
+      url: await getSignedPhotoUrl(p.objectPath),
+      category: p.category,
+      sortOrder: p.sortOrder,
+    })),
+  );
 
   return (
     <div className="space-y-6">
@@ -67,6 +82,8 @@ export default async function EditListingPage({ params }: EditListingPageParams)
       )}
 
       <ListingBuilder listing={listing} isNew={false} />
+
+      <PhotoManager listingId={id} photos={photos} />
     </div>
   );
 }

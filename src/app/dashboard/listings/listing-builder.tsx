@@ -21,16 +21,6 @@ const AMENITY_OPTIONS = [
   "tv",
 ] as const;
 
-const PHOTO_CATEGORY_OPTIONS = [
-  "exterior",
-  "bedroom",
-  "living",
-  "kitchen",
-  "bathroom",
-  "surrounding",
-  "hero",
-] as const;
-
 interface ListingBuilderProps {
   listing: Listing | null;
   isNew: boolean;
@@ -203,34 +193,6 @@ export function ListingBuilder({ listing, isNew }: ListingBuilderProps) {
               className="w-full rounded-control border border-stone bg-white px-3 py-2 text-sm"
             />
           </Field>
-        </div>
-      </Section>
-
-      <Section
-        title="Photos"
-        hint={`Pick at least 3 categories before publishing. ${v.photoCategories.length} selected.`}
-      >
-        {errors.photoCategories && (
-          <p role="alert" className="mb-2 text-sm text-danger">
-            {errors.photoCategories}
-          </p>
-        )}
-        <div className="flex flex-wrap gap-2">
-          {PHOTO_CATEGORY_OPTIONS.map((c) => (
-            <label
-              key={c}
-              className="inline-flex items-center gap-2 rounded-full border border-stone bg-white px-3 py-1 text-sm has-[:checked]:border-leaf has-[:checked]:bg-rice"
-            >
-              <input
-                type="checkbox"
-                name="photoCategories"
-                value={c}
-                defaultChecked={v.photoCategories.includes(c)}
-                className="h-3 w-3"
-              />
-              {c}
-            </label>
-          ))}
         </div>
       </Section>
 

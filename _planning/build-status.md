@@ -9,7 +9,7 @@ Chapter 4 in progress. Work Card 4.0 (front-loaded Security Gate) is done: threa
 
 ## Next Move
 
-Apply the 8 migrations to the Supabase project and run the live retest (see "Chapter 4 Manual-Action Gate" below) before any "done" or production claim. After live verification passes, build the 4.4 photo-upload UI as a focused follow-up (Atelier UX pass recommended), then Chapter 5 (Admin Review).
+Apply the 9 migrations to a fresh Supabase project in numeric order (0001 → 0009) when deploying elsewhere. Chapter 4 is done and live-verified. Next: Chapter 5 (Admin Review), where Sentinel finding L1 (admin column-scope) is also closed. Optional fast-follows: photo reorder / cover-choose, optional photo caption column for richer alt text.
 
 ## Build Chapters
 
@@ -18,7 +18,7 @@ Apply the 8 migrations to the Supabase project and run the live retest (see "Cha
 | 1 | App Foundation And Brand Shell | done | Scaffold, brand shell, mock data, helpers. |
 | 2 | Public Discovery And Listing Experience | done | Closed out 2026-05-28 with Atelier review. |
 | 3 | Owner Dashboard And Listing Builder | implemented | Awaiting Adam review across owner routes. |
-| 4 | Supabase Auth, Data, And Storage | code-complete (unverified vs live DB) | Gate + migrations + auth + data + storage backend done. Blocked on applying migrations and RLS/trigger/storage retest against live Supabase. |
+| 4 | Supabase Auth, Data, And Storage | done | Auth, RLS data layer, storage + full photo upload/display loop all live-verified against real Supabase. 9 migrations applied. L1 admin column-scope deferred to Ch5. |
 | 5 | Admin Review And Launch Readiness | pending | Requires Supabase foundation. |
 | 6 | Bahasa Malaysia Fast-Follow | pending | Committed fast-follow after MVP surface is ready. |
 | 7 | Critical Launch Fast-Follows | pending | Prioritize based on pilot risk. |
@@ -295,6 +295,29 @@ Commands run (static verification only):
 - `npm run build` (clean `.next/`) — 9 routes, 0 errors. All routes now `ƒ` (dynamic) + middleware registered.
 
 NOT verified: no code in this chapter has run against a live Supabase project. Auth, RLS, triggers, storage, and the metrics RPC are unproven at runtime until the manual-action gate below is completed.
+
+### Chapter 4 Photo Upload (4.4, 2026-05-29) — live-verified
+
+Atelier-47 direction ("Contact Sheet, not Card Wall"): per-photo category, uniform aspect-[4/3] crop, optimistic preview, upload on edit page only.
+
+Files added:
+- `src/components/dashboard/photo-manager.tsx` — client grid: add-tile-first, optimistic "Uploading…" tiles, per-photo category select, two-step inline delete, progress meter (N of 3 → ready), aria-live.
+- `src/app/dashboard/listings/[id]/photos/actions.ts` — 3 server actions (upload w/ per-file validation + orphan rollback, set-category, delete), all `requireOwner` + owner-scoped.
+
+Files modified:
+- `src/server/listings-data.ts` — added `getListingPhotos` (owner-scoped) + `nextPhotoSortOrder`.
+- `src/app/dashboard/listings/[id]/edit/page.tsx` — mints signed URLs, renders PhotoManager.
+- `src/app/listings/[slug]/page.tsx` — mints signed URLs for public gallery.
+- `src/components/listings/listing-gallery.tsx` — renders real `<img>` (was Ch3 placeholder) with placeholder fallback.
+- `src/app/dashboard/listings/listing-builder.tsx` — removed fake category-checkbox grid (also fixed latent data-loss: syncPlaceholderPhotos no longer wipes real photos on edit).
+- `src/lib/listing-builder-validation.ts` — dropped app-level photoCategories publish check (DB trigger + real photo count authoritative).
+
+Migrations added:
+- `0009_chapter4_public_photo_read.sql` — anon SELECT on storage objects for PUBLISHED listings only (path segment 2 = listing id). Bucket stays private; display uses signed URLs.
+
+Verified live (real Supabase): owner uploads 3 photos on edit page → thumbnails render → published → photos display on public listing page. Full owner→private-storage→signed-URL→public loop proven end to end. typecheck clean, lint 0/0, tests 36/36, build clean.
+
+Known fast-follows: photo reorder / cover-choose (cover = first uploaded for now); optional caption column for richer alt text (currently `{name} photo`).
 
 ### Chapter 4 Security Review (2026-05-29, Sentinel-47 + Agent 47 Review Gate)
 

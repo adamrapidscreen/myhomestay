@@ -5,6 +5,7 @@ import {
   findPublishedListingBySlug,
   getPublicListingOwner,
 } from "@/server/listings-data";
+import { getSignedPhotoUrl } from "@/server/listing-photos-storage";
 import { formatLocationDetail } from "@/lib/locations/my";
 import { ListingGallery } from "@/components/listings/listing-gallery";
 import { TrustStrip } from "@/components/listings/trust-strip";
@@ -39,6 +40,15 @@ export default async function ListingDetailPage({ params }: ListingDetailParams)
 
   const owner = await getPublicListingOwner(listing.id);
   if (!owner) notFound();
+
+  // Resolve each stored photo object path to a short-lived signed URL.
+  // Anon read is permitted for published listings via migration 0009.
+  const galleryPhotos = await Promise.all(
+    listing.photos.map(async (p) => ({
+      ...p,
+      src: (await getSignedPhotoUrl(p.src)) ?? "",
+    })),
+  );
 
   return (
     <main className="min-h-screen pb-24 sm:pb-0">
@@ -77,7 +87,7 @@ export default async function ListingDetailPage({ params }: ListingDetailParams)
         </div>
 
         <div className="mt-6">
-          <ListingGallery photos={listing.photos} />
+          <ListingGallery photos={galleryPhotos} />
         </div>
 
         <div className="mt-10 grid gap-10 md:grid-cols-12">
