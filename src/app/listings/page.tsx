@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
-import { listMockListingsByStatus } from "@/data/listings";
+import { listPublishedListings } from "@/server/listings-data";
 import {
   applyListingFilters,
   isFilterStateEmpty,
@@ -23,7 +23,7 @@ interface ListingsPageProps {
 export default async function ListingsPage({ searchParams }: ListingsPageProps) {
   const resolved = await searchParams;
   const filters = parseListingFilters(resolved);
-  const published = listMockListingsByStatus("published");
+  const published = await listPublishedListings();
   const results = applyListingFilters(published, filters);
   const totalPublished = published.length;
 

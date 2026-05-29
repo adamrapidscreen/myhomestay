@@ -28,3 +28,14 @@ export interface OwnerProfile {
   /** Whether this owner has completed onboarding. */
   onboardingComplete: boolean;
 }
+
+/**
+ * Safe public owner fields for listing pages. Never includes full name or
+ * postcode. Sourced from the get_listing_owner_public RPC for published
+ * listings only. See _planning/security-gate-chapter-4.md (T4).
+ */
+export interface PublicListingOwner {
+  displayName: string;
+  whatsappNumber: string;
+  regionLabel?: string;
+}

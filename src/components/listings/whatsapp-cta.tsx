@@ -2,7 +2,7 @@
 
 import { useCallback } from "react";
 import type { Listing } from "@/types/listings";
-import type { OwnerProfile } from "@/types/owners";
+import type { PublicListingOwner } from "@/types/owners";
 import {
   buildListingWhatsappUrl,
 } from "@/lib/whatsapp";
@@ -20,7 +20,7 @@ import {
  */
 interface WhatsappCtaProps {
   listing: Listing;
-  owner: OwnerProfile;
+  owner: PublicListingOwner;
   variant?: "inline" | "sticky";
 }
 
@@ -31,12 +31,9 @@ export function WhatsappCta({ listing, owner, variant = "inline" }: WhatsappCtaP
     if (typeof window === "undefined") return;
     // Mock-only click capture. Replace with durable metrics in Ch5.
     if (process.env.NODE_ENV !== "production") {
-      console.debug("[whatsapp-cta] click", {
-        listingId: listing.id,
-        ownerId: owner.id,
-      });
+      console.debug("[whatsapp-cta] click", { listingId: listing.id });
     }
-  }, [listing.id, owner.id]);
+  }, [listing.id]);
 
   if (!href) {
     return (

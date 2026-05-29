@@ -4,7 +4,7 @@ This file is the repo-local doctrine for MyHomestay.
 
 ## Release Marker
 
-Current version: `Beta 0.10` (`package.json` `0.10.0`).
+Current version: `Beta 0.15` (`package.json` `0.15.0`).
 
 Release notes live under `docs/releases/`.
 

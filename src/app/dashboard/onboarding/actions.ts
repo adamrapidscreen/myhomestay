@@ -2,8 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { getMockCurrentOwner } from "@/data/owners";
-import { findOwnerById, replaceOwner } from "@/server/owner-profile-store";
+import { getSessionUser } from "@/server/auth";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 import {
   isValidWhatsappNumber,
   normalizeWhatsappNumber,
@@ -25,8 +25,6 @@ export interface OnboardingFormState {
     consent: boolean;
   };
 }
-
-const EMPTY_STATE: OnboardingFormState = { ok: false };
 
 export async function saveOwnerProfileAction(
   _prev: OnboardingFormState,
@@ -62,28 +60,32 @@ export async function saveOwnerProfileAction(
     return { ok: false, errors, values };
   }
 
-  const current = getMockCurrentOwner();
-  const owner = findOwnerById(current.id);
-  if (!owner) {
-    return {
-      ok: false,
-      errors: { general: "Owner not found in this session." },
-      values,
-    };
+  const user = await getSessionUser();
+  if (!user) {
+    redirect("/login");
   }
 
   const normalized = normalizeWhatsappNumber(whatsappRaw);
-  replaceOwner({
-    ...owner,
-    displayName,
-    fullName,
-    whatsappNumber: `+${normalized}`,
-    onboardingComplete: true,
-  });
+  const supabase = await createSupabaseServerClient();
+  const { error } = await supabase
+    .from("profiles")
+    .update({
+      display_name: displayName,
+      full_name: fullName,
+      whatsapp_number: `+${normalized}`,
+      onboarding_complete: true,
+    })
+    .eq("id", user.id);
+
+  if (error) {
+    return {
+      ok: false,
+      errors: { general: "Could not save your profile. Please try again." },
+      values,
+    };
+  }
 
   revalidatePath("/dashboard");
   revalidatePath("/dashboard/onboarding");
   redirect("/dashboard");
 }
-
-export { EMPTY_STATE };

@@ -1,15 +1,15 @@
 # MyHomestay Build Status
 
-Last updated: 2026-05-28
+Last updated: 2026-05-29
 Tracker type: KD Plan & Build Flow pilot
 
 ## Current Focus
 
-Chapter 3 implemented. Awaiting Adam review across `/dashboard`, `/dashboard/onboarding`, `/dashboard/listings/new`, and one `/dashboard/listings/[id]/edit` route.
+Chapter 4 in progress. Work Card 4.0 (front-loaded Security Gate) is done: threat model, schema, RLS, DB-layer business rules, storage policy, and auth bootstrap are authored as migrations under `supabase/migrations/`. Next is 4.1 Supabase client setup.
 
 ## Next Move
 
-Adam reviews the Chapter 3 receipts and clicks through the owner workflow. After approval, plan Chapter 4 (Supabase Auth, Data, Storage). Hold the Sentinel Security Gate before any auth/data wiring.
+Apply the 8 migrations to the Supabase project and run the live retest (see "Chapter 4 Manual-Action Gate" below) before any "done" or production claim. After live verification passes, build the 4.4 photo-upload UI as a focused follow-up (Atelier UX pass recommended), then Chapter 5 (Admin Review).
 
 ## Build Chapters
 
@@ -18,7 +18,7 @@ Adam reviews the Chapter 3 receipts and clicks through the owner workflow. After
 | 1 | App Foundation And Brand Shell | done | Scaffold, brand shell, mock data, helpers. |
 | 2 | Public Discovery And Listing Experience | done | Closed out 2026-05-28 with Atelier review. |
 | 3 | Owner Dashboard And Listing Builder | implemented | Awaiting Adam review across owner routes. |
-| 4 | Supabase Auth, Data, And Storage | pending | Do not start until UI contract feels right. |
+| 4 | Supabase Auth, Data, And Storage | code-complete (unverified vs live DB) | Gate + migrations + auth + data + storage backend done. Blocked on applying migrations and RLS/trigger/storage retest against live Supabase. |
 | 5 | Admin Review And Launch Readiness | pending | Requires Supabase foundation. |
 | 6 | Bahasa Malaysia Fast-Follow | pending | Committed fast-follow after MVP surface is ready. |
 | 7 | Critical Launch Fast-Follows | pending | Prioritize based on pilot risk. |
@@ -249,9 +249,83 @@ Mock data session caveat (intentional):
 - Owner workflow uses module-scoped working stores (`workingListings`, `workingOwners`).
 - All edits reset on `next start` restart. The dashboard footer and onboarding form both display this caveat in user copy.
 
-## Decisions
+### Chapter 4 (2026-05-29)
 
-- Founder Decision Lock accepted on 2026-05-28.
+Founder decisions locked: email OTP auth; `role` enum on `profiles` (admin set in Supabase dashboard); skip Vercel preview, wire locally.
+
+Security Gate (4.0): `_planning/security-gate-chapter-4.md` — threat model (T1-T12, OWASP-mapped), schema, RLS intent, DB-layer business rules, storage policy, env strategy, residual risk.
+
+Migrations authored (NOT applied):
+
+- `0001_chapter4_schema.sql` — enums, 5 tables, indexes, updated_at.
+- `0002_chapter4_rls.sql` — RLS enable, `is_admin()`, ownership + published-only + admin policies.
+- `0003_chapter4_rules.sql` — free-tier (3-listing) trigger, role guard, status-transition trigger.
+- `0003b_chapter4_rules.sql` — publish-completeness gate trigger, `increment_listing_metric` RPC.
+- `0004_chapter4_storage.sql` — private `listing-photos` bucket (mime allowlist, 5MB), path-scoped object RLS.
+- `0005_chapter4_auth_bootstrap.sql` — auto-create profile on new auth user.
+- `0006_chapter4_public_owner.sql` — `get_listing_owner_public` RPC (safe owner fields, published only).
+
+Files added:
+
+- `src/lib/supabase/{env,client,server,admin}.ts` — env accessor + browser/server/service-role clients.
+- `src/middleware.ts` — `@supabase/ssr` session refresh.
+- `src/server/auth.ts` — `getSessionUser`, `getCurrentOwner`, `requireOwner`, `isAdmin`.
+- `src/app/login/{page,login-form,actions}.tsx` — email OTP two-step login + sign-out.
+- `src/server/listings-data.ts` — RLS-bound listing reads/writes; replaces mock stores.
+- `src/server/listing-photos-storage.ts` — upload (mime/size/path validation), delete, signed URL.
+
+Files modified:
+
+- `src/app/dashboard/{layout,page}.tsx`, `dashboard/onboarding/{page,actions}.ts`, `dashboard/listings/actions.ts`, `dashboard/listings/[id]/edit/page.tsx` — real auth + Supabase.
+- `src/app/{page,listings/page,listings/[slug]/page}.tsx` — public reads via Supabase; detail page is now dynamic (was SSG) and uses the public-owner RPC.
+- `src/components/listings/{owner-card,whatsapp-cta}.tsx` — narrowed to `PublicListingOwner` (no full name/postcode).
+- `src/types/owners.ts` — added `PublicListingOwner`.
+
+Files deleted:
+
+- `src/server/owner-store.ts`, `src/server/owner-profile-store.ts` — non-RLS mock mutation layer, fully replaced.
+
+Dependencies: added `@supabase/supabase-js`, `@supabase/ssr`. `npm audit fix` resolved the `@supabase/auth-js` advisory (GHSA-8r88-6cj9-9fh5). 2 moderate transitive advisories remain (postcss under Next; build-time only; no non-breaking fix; accepted).
+
+Commands run (static verification only):
+
+- `npm run typecheck` — clean.
+- `npm run lint` — 0 errors, 0 warnings.
+- `npm test` — 36/36 passing.
+- `npm run build` (clean `.next/`) — 9 routes, 0 errors. All routes now `ƒ` (dynamic) + middleware registered.
+
+NOT verified: no code in this chapter has run against a live Supabase project. Auth, RLS, triggers, storage, and the metrics RPC are unproven at runtime until the manual-action gate below is completed.
+
+### Chapter 4 Security Review (2026-05-29, Sentinel-47 + Agent 47 Review Gate)
+
+Sentinel-47 read all 7 migrations + 14 app files against the gate contract. Verdict: "no blocking design flaws in source, 2 contract deviations, 0 runtime verification yet."
+
+Confirmed sound at source: cross-owner RLS (owner_id = auth.uid() on USING + WITH CHECK), role-escalation guard, service-role boundary (admin.ts server-only, never called from client), getUser()-based auth, no open redirects, full_name never anon-reachable, all 7 SECURITY DEFINER funcs had locked search_path.
+
+Findings + actions:
+
+- M1 (postcode public leak, A01/A02) — FULLY FIXED: app nulls postcode on public reads via `publicView`; migration `0008` removes anon table SELECT policies and routes public reads through column-scoped SECURITY DEFINER RPCs (`get_published_listings`, `get_published_listing_by_slug`) that omit postcode. Owners still read their own full rows.
+- M2 (publish gate violable post-publish, A04) — PATCHED: migration `0007` re-validates completeness on ANY update while status = published, not only the transition.
+- I1 (2 triggers missing locked search_path) — PATCHED: `0007` pins search_path on enforce_free_listing_limit + enforce_status_transition.
+- L1 (admin UPDATE not column-scoped, A01) — DEFERRED to Ch5 Admin Review; gate doc corrected to stop claiming status-only admin edits.
+- L2/I2/I3/I4 — accepted/deferred residuals (OTP rate-limit reliance, free-tier insert race, anon metrics +1, storage litter). Documented.
+- I5 (real upload unwired; publish gate counts placeholder photo rows) — deliberate Ch4 scope; real upload UI is the deferred follow-up.
+
+Migration added: `0007_chapter4_security_fixes.sql`. Re-verified after fixes: typecheck clean, lint 0/0, tests 36/36, dev server healthy.
+
+Live login proven this session (real Supabase): OTP request → emailed code → verify → session → /dashboard. 4 runtime bugs found and fixed during live test (hidden duplicate email field; 6-vs-8 digit code length; "6-digit" copy string; `EMPTY_STATE` non-async export in a "use server" file). Profile save (RLS-bound profiles UPDATE) confirmed working.
+
+## Chapter 4 Manual-Action Gate (REQUIRED before any "done" / production claim)
+
+- [ ] Apply migrations `0001`..`0008` to the Supabase project (SQL editor or `supabase db push`). Note: `0007` (publish-gate/search_path fixes) and `0008` (public-read column scope) were added after the security review and MUST be applied for M1/M2/I1 fixes to take effect.
+- [ ] Create the `listing-photos` bucket if `0004` did not (verify private + mime + size limit).
+- [ ] Enable email OTP in Supabase Auth settings; set redirect/site URL to match `NEXT_PUBLIC_SITE_URL`.
+- [ ] Set `SUPABASE_SERVICE_ROLE_KEY` in `.env.local` (already present per prior session) and confirm it is never `NEXT_PUBLIC_`.
+- [ ] Live retest (Feature Gate): sign in via OTP; create draft; confirm 4th listing insert is rejected by the DB trigger; confirm publish is blocked when <3 photos / missing fields; confirm a second account cannot read/edit the first owner's draft (RLS); confirm anon can read only published listings; confirm public listing page shows owner display name + WhatsApp but never full name/postcode.
+- [ ] Promote `role='admin'` on one profile in the dashboard; confirm admin-only pause/needs_review path.
+- [ ] Record retest evidence in a Chapter 4 retest receipt before marking Chapter 4 `done`.
+
+## Decisions
 - Use Build Chapters and Work Cards instead of epics/stories.
 - English-first MVP with BM-ready architecture; BM is a committed fast-follow.
 - Mock-first for Chapter 1 and Chapter 2.

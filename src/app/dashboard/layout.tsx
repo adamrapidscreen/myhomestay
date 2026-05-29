@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { getMockCurrentOwner } from "@/data/owners";
-import { listListingsByOwner } from "@/server/owner-store";
+import { requireOwner } from "@/server/auth";
+import { listListingsByOwner } from "@/server/listings-data";
+import { signOutAction } from "@/app/login/actions";
 
 export const metadata: Metadata = {
   title: {
@@ -10,13 +11,13 @@ export const metadata: Metadata = {
   },
 };
 
-export default function DashboardLayout({
+export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const owner = getMockCurrentOwner();
-  const listings = listListingsByOwner(owner.id);
+  const owner = await requireOwner();
+  const listings = await listListingsByOwner(owner.id);
   const usedFreeListings = listings.length;
 
   return (
@@ -43,6 +44,14 @@ export default function DashboardLayout({
             >
               + New listing
             </Link>
+            <form action={signOutAction}>
+              <button
+                type="submit"
+                className="inline-flex items-center justify-center rounded-control border border-stone bg-paper px-3 py-1.5 text-sm text-muted-ink hover:text-ink"
+              >
+                Sign out
+              </button>
+            </form>
           </div>
         </div>
         <nav className="border-t border-stone">

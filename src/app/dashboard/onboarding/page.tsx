@@ -1,15 +1,13 @@
 import type { Metadata } from "next";
-import { getMockCurrentOwner } from "@/data/owners";
-import { findOwnerById } from "@/server/owner-profile-store";
+import { requireOwner } from "@/server/auth";
 import { OnboardingForm } from "./onboarding-form";
 
 export const metadata: Metadata = {
   title: "Owner profile",
 };
 
-export default function OnboardingPage() {
-  const seed = getMockCurrentOwner();
-  const owner = findOwnerById(seed.id) ?? seed;
+export default async function OnboardingPage() {
+  const owner = await requireOwner();
 
   return (
     <div className="max-w-form mx-auto space-y-8">

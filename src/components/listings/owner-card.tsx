@@ -1,4 +1,4 @@
-import type { OwnerProfile } from "@/types/owners";
+import type { PublicListingOwner } from "@/types/owners";
 
 /**
  * Owner profile card shown near the WhatsApp CTA on listing pages.
@@ -8,7 +8,7 @@ import type { OwnerProfile } from "@/types/owners";
  * through the WhatsApp link instead.
  */
 interface OwnerCardProps {
-  owner: OwnerProfile;
+  owner: PublicListingOwner;
 }
 
 export function OwnerCard({ owner }: OwnerCardProps) {

@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getMockCurrentOwner } from "@/data/owners";
-import { findListingById } from "@/server/owner-store";
+import { requireOwner } from "@/server/auth";
+import { findListingById } from "@/server/listings-data";
 import { evaluateListingCompleteness } from "@/lib/listing-completeness";
 import { LISTING_STATUS_DISPLAY } from "@/lib/listing-status-display";
 import { ListingBuilder } from "../../listing-builder";
@@ -15,14 +15,14 @@ export async function generateMetadata({
   params,
 }: EditListingPageParams): Promise<Metadata> {
   const { id } = await params;
-  const listing = findListingById(id);
+  const listing = await findListingById(id);
   return { title: listing ? `Edit · ${listing.name}` : "Edit listing" };
 }
 
 export default async function EditListingPage({ params }: EditListingPageParams) {
   const { id } = await params;
-  const owner = getMockCurrentOwner();
-  const listing = findListingById(id);
+  const owner = await requireOwner();
+  const listing = await findListingById(id);
   if (!listing || listing.ownerId !== owner.id) notFound();
 
   const completeness = evaluateListingCompleteness(listing);

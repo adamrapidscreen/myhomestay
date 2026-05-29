@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { findMockListingBySlug, mockListings } from "@/data/listings";
-import { findMockOwnerById } from "@/data/owners";
+import {
+  findPublishedListingBySlug,
+  getPublicListingOwner,
+} from "@/server/listings-data";
 import { formatLocationDetail } from "@/lib/locations/my";
 import { ListingGallery } from "@/components/listings/listing-gallery";
 import { TrustStrip } from "@/components/listings/trust-strip";
@@ -13,18 +15,12 @@ interface ListingDetailParams {
   params: Promise<{ slug: string }>;
 }
 
-export async function generateStaticParams() {
-  return mockListings
-    .filter((l) => l.status === "published")
-    .map((l) => ({ slug: l.slug }));
-}
-
 export async function generateMetadata({
   params,
 }: ListingDetailParams): Promise<Metadata> {
   const { slug } = await params;
-  const listing = findMockListingBySlug(slug);
-  if (!listing || listing.status !== "published") {
+  const listing = await findPublishedListingBySlug(slug);
+  if (!listing) {
     return { title: "Listing not found" };
   }
   return {
@@ -35,13 +31,13 @@ export async function generateMetadata({
 
 export default async function ListingDetailPage({ params }: ListingDetailParams) {
   const { slug } = await params;
-  const listing = findMockListingBySlug(slug);
+  const listing = await findPublishedListingBySlug(slug);
 
-  if (!listing || listing.status !== "published") {
+  if (!listing) {
     notFound();
   }
 
-  const owner = findMockOwnerById(listing.ownerId);
+  const owner = await getPublicListingOwner(listing.id);
   if (!owner) notFound();
 
   return (

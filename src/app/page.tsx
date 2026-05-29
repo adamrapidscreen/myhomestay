@@ -1,9 +1,9 @@
 import Link from "next/link";
-import { listMockListingsByStatus } from "@/data/listings";
+import { listPublishedListings } from "@/server/listings-data";
 import { formatLocationCompact } from "@/lib/locations/my";
 
-export default function HomePage() {
-  const published = listMockListingsByStatus("published");
+export default async function HomePage() {
+  const published = await listPublishedListings();
   const featured = published[0];
   const featuredHref = featured ? `/listings/${featured.slug}` : "/listings";
 

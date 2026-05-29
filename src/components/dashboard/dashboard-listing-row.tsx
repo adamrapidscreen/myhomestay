@@ -39,9 +39,11 @@ function decideNextAction(listing: Listing): { label: string; href: string; prim
       primary: false,
     };
   }
+  // Published: owner still needs an edit affordance. The public-page link
+  // renders separately below as a secondary action.
   return {
-    label: "View public page",
-    href: `/listings/${listing.slug}`,
+    label: "Edit listing",
+    href: `/dashboard/listings/${listing.id}/edit`,
     primary: false,
   };
 }

@@ -1,11 +1,11 @@
 import Link from "next/link";
-import { getMockCurrentOwner } from "@/data/owners";
-import { listListingsByOwner } from "@/server/owner-store";
+import { requireOwner } from "@/server/auth";
+import { listListingsByOwner } from "@/server/listings-data";
 import { DashboardListingRow } from "@/components/dashboard/dashboard-listing-row";
 
-export default function DashboardPage() {
-  const owner = getMockCurrentOwner();
-  const listings = listListingsByOwner(owner.id);
+export default async function DashboardPage() {
+  const owner = await requireOwner();
+  const listings = await listListingsByOwner(owner.id);
   const onboardingComplete = owner.onboardingComplete;
 
   return (
