@@ -19,7 +19,7 @@ Apply the 9 migrations to a fresh Supabase project in numeric order (0001 → 00
 | 2 | Public Discovery And Listing Experience | done | Closed out 2026-05-28 with Atelier review. |
 | 3 | Owner Dashboard And Listing Builder | implemented | Awaiting Adam review across owner routes. |
 | 4 | Supabase Auth, Data, And Storage | done | Auth, RLS data layer, storage + full photo upload/display loop all live-verified against real Supabase. 9 migrations applied. L1 admin column-scope deferred to Ch5. |
-| 5 | Admin Review And Launch Readiness | pending | Requires Supabase foundation. |
+| 5 | Admin Review And Launch Readiness | code-complete (blocked on live verify) | Admin moderation (pause/needs_review/clear) + audit built; Sentinel pass fixed H1/M1/M2/L-A. Blocked on applying migration 0010 + live admin test. |
 | 6 | Bahasa Malaysia Fast-Follow | pending | Committed fast-follow after MVP surface is ready. |
 | 7 | Critical Launch Fast-Follows | pending | Prioritize based on pilot risk. |
 

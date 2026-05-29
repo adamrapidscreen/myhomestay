@@ -94,3 +94,20 @@ export async function requireOwner(): Promise<OwnerProfile> {
   }
   return owner;
 }
+
+/**
+ * Require an authenticated admin. Redirects signed-out users to /login and
+ * non-admins to /dashboard. Use at the top of every admin-only server
+ * component or action. RLS + is_admin() remain the authoritative gate; this
+ * is the app-layer guard for routing and UX.
+ */
+export async function requireAdmin(): Promise<OwnerProfile> {
+  const owner = await getCurrentOwner();
+  if (!owner) {
+    redirect("/login");
+  }
+  if (!(await isAdmin())) {
+    redirect("/dashboard");
+  }
+  return owner;
+}
