@@ -14,6 +14,24 @@ export const metadata: Metadata = {
   title: "Browse homestays",
   description:
     "Trustworthy local homestays in Malaysia. Browse by state, capacity, price, and Muslim-friendly or family-friendly details.",
+  alternates: {
+    canonical: "/listings",
+  },
+  openGraph: {
+    title: "Browse homestays | MyHomestay",
+    description:
+      "Trustworthy local homestays in Malaysia with direct WhatsApp handoff to owners.",
+    url: "/listings",
+    siteName: "MyHomestay",
+    type: "website",
+    locale: "en_MY",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Browse homestays | MyHomestay",
+    description:
+      "Trustworthy local homestays in Malaysia with direct WhatsApp handoff to owners.",
+  },
 };
 
 interface ListingsPageProps {

@@ -21,6 +21,8 @@ export function AdminListingRow({ listing }: AdminListingRowProps) {
 
   const canPause = listing.status === "published";
   const canFlag = listing.status !== "needs_review";
+  const canPublish =
+    listing.status === "paused" || listing.status === "needs_review";
   const canClear = listing.status === "needs_review";
 
   return (
@@ -94,6 +96,15 @@ export function AdminListingRow({ listing }: AdminListingRowProps) {
             className="rounded-control border border-danger bg-paper px-3 py-1.5 text-sm font-medium text-danger hover:bg-rice disabled:opacity-40"
           >
             Flag for review
+          </button>
+          <button
+            type="submit"
+            name="action"
+            value="publish"
+            disabled={pending || !canPublish}
+            className="rounded-control border border-leaf bg-paper px-3 py-1.5 text-sm font-medium text-deep-leaf hover:bg-rice disabled:opacity-40"
+          >
+            Restore live
           </button>
           <button
             type="submit"

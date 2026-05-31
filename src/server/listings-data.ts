@@ -251,6 +251,20 @@ export async function getPublicListingOwner(listingId: string): Promise<{
   };
 }
 
+export type ListingMetricName = "views" | "whatsapp_clicks";
+
+/** Increment a public metric through the DB RPC. The RPC only counts published listings. */
+export async function incrementListingMetric(
+  listingId: string,
+  metric: ListingMetricName,
+): Promise<void> {
+  const supabase = await createSupabaseServerClient();
+  await supabase.rpc("increment_listing_metric", {
+    p_listing_id: listingId,
+    p_metric: metric,
+  });
+}
+
 // ---------------------------------------------------------------------------
 // Writes (RLS enforces owner_id = auth.uid(); triggers enforce business rules)
 // ---------------------------------------------------------------------------

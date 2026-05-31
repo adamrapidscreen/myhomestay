@@ -11,6 +11,8 @@ import { ListingGallery } from "@/components/listings/listing-gallery";
 import { TrustStrip } from "@/components/listings/trust-strip";
 import { OwnerCard } from "@/components/listings/owner-card";
 import { WhatsappCta } from "@/components/listings/whatsapp-cta";
+import { ListingViewBeacon } from "@/components/listings/listing-metric-beacon";
+import { getSiteUrl } from "@/lib/supabase/env";
 
 interface ListingDetailParams {
   params: Promise<{ slug: string }>;
@@ -24,9 +26,35 @@ export async function generateMetadata({
   if (!listing) {
     return { title: "Listing not found" };
   }
+  const canonicalPath = `/listings/${listing.slug}`;
   return {
     title: listing.name,
     description: listing.summary,
+    alternates: {
+      canonical: canonicalPath,
+    },
+    openGraph: {
+      title: `${listing.name} | MyHomestay`,
+      description: listing.summary,
+      url: canonicalPath,
+      siteName: "MyHomestay",
+      type: "website",
+      locale: "en_MY",
+      images: [
+        {
+          url: `${canonicalPath}/opengraph-image`,
+          width: 1200,
+          height: 630,
+          alt: `${listing.name} on MyHomestay`,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${listing.name} | MyHomestay`,
+      description: listing.summary,
+      images: [`${getSiteUrl()}${canonicalPath}/opengraph-image`],
+    },
   };
 }
 
@@ -52,6 +80,7 @@ export default async function ListingDetailPage({ params }: ListingDetailParams)
 
   return (
     <main className="min-h-screen pb-24 sm:pb-0">
+      <ListingViewBeacon listingId={listing.id} />
       <header className="border-b border-stone bg-paper">
         <div className="mx-auto flex w-full max-w-public items-center justify-between px-4 py-5 sm:px-6">
           <Link href="/" className="flex items-center gap-2">

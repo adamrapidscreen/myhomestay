@@ -1,15 +1,15 @@
 # MyHomestay Build Status
 
-Last updated: 2026-05-29
+Last updated: 2026-06-01
 Tracker type: KD Plan & Build Flow pilot
 
 ## Current Focus
 
-Chapter 4 in progress. Work Card 4.0 (front-loaded Security Gate) is done: threat model, schema, RLS, DB-layer business rules, storage policy, and auth bootstrap are authored as migrations under `supabase/migrations/`. Next is 4.1 Supabase client setup.
+Chapter 5 is complete for the controlled-pilot baseline. Minimal admin moderation, durable public metrics, SEO/share metadata, and pilot checklist are implemented and locally verified. Adam live-verified admin access, pause, restore-live, and the remaining admin flow felt correct in manual review. Release marker: Beta 0.16.
 
 ## Next Move
 
-Apply the 9 migrations to a fresh Supabase project in numeric order (0001 → 0009) when deploying elsewhere. Chapter 4 is done and live-verified. Next: Chapter 5 (Admin Review), where Sentinel finding L1 (admin column-scope) is also closed. Optional fast-follows: photo reorder / cover-choose, optional photo caption column for richer alt text.
+Review and refine `docs/product/launch-bloom-spec.md`, then choose the next launch-bloom implementation slice. Do not start broader launch features until the spec is accepted.
 
 ## Build Chapters
 
@@ -19,11 +19,20 @@ Apply the 9 migrations to a fresh Supabase project in numeric order (0001 → 00
 | 2 | Public Discovery And Listing Experience | done | Closed out 2026-05-28 with Atelier review. |
 | 3 | Owner Dashboard And Listing Builder | implemented | Awaiting Adam review across owner routes. |
 | 4 | Supabase Auth, Data, And Storage | done | Auth, RLS data layer, storage + full photo upload/display loop all live-verified against real Supabase. 9 migrations applied. L1 admin column-scope deferred to Ch5. |
-| 5 | Admin Review And Launch Readiness | code-complete (blocked on live verify) | Admin moderation (pause/needs_review/clear) + audit built; Sentinel pass fixed H1/M1/M2/L-A. Blocked on applying migration 0010 + live admin test. |
+| 5 | Admin Review And Launch Readiness | done | Admin moderation (pause/needs_review/restore/clear), audit path, metrics, SEO/share metadata, and pilot checklist built. Local verification clean; Adam manual review passed for controlled pilot. |
 | 6 | Bahasa Malaysia Fast-Follow | pending | Committed fast-follow after MVP surface is ready. |
 | 7 | Critical Launch Fast-Follows | pending | Prioritize based on pilot risk. |
 
 ## Active Work Cards
+
+### Chapter 5 (done)
+
+| Card | Name | Status | Verification Target | Notes |
+| --- | --- | --- | --- | --- |
+| 5.1 | Minimal Admin Review | done | live admin flow + audit path | `/admin` protected; pause and restore-live live-verified by Adam. `0010` + `0011` applied live. Remaining row-level audit inspection is a pilot hardening check, not a release blocker. |
+| 5.2 | Durable WhatsApp Metrics | done | local runtime + live metric RPC | `/api/listing-metrics` validates UUID + metric allowlist. Hawa Homestay live WhatsApp clicks incremented 0 -> 1 through local API + public RPC. |
+| 5.3 | SEO And Share Metadata | done | build + runtime metadata probe | Directory/listing canonical, OG, Twitter metadata added. `/listings/hawa-homestay/opengraph-image` returns `200 image/png`. |
+| 5.4 | Security Gate And Pilot Checklist | done | local feature gate + manual acceptance | Typecheck/lint/tests/build clean; high/critical audit clean; `.env.local` ignored. Residual risks accepted for controlled pilot, not production readiness. |
 
 ### Chapter 3 (implemented)
 
@@ -337,6 +346,48 @@ Findings + actions:
 Migration added: `0007_chapter4_security_fixes.sql`. Re-verified after fixes: typecheck clean, lint 0/0, tests 36/36, dev server healthy.
 
 Live login proven this session (real Supabase): OTP request → emailed code → verify → session → /dashboard. 4 runtime bugs found and fixed during live test (hidden duplicate email field; 6-vs-8 digit code length; "6-digit" copy string; `EMPTY_STATE` non-async export in a "use server" file). Profile save (RLS-bound profiles UPDATE) confirmed working.
+
+### Chapter 5 Review Pass (2026-05-31)
+
+Scope completed:
+
+- Minimal admin moderation surface supports pause, flag for review, restore live, and clear to draft.
+- Migration `0010_chapter5_admin_moderation.sql` adds column-scoped admin moderation and atomic `moderate_listing`.
+- Migration `0011_chapter5_admin_restore_live.sql` adds restore-live/publish action support and audit constraint coverage.
+- Public metrics route `/api/listing-metrics` records fixed +1 view or WhatsApp click metrics through the existing DB RPC.
+- Listing detail pages send view beacons; WhatsApp CTA sends click beacons.
+- Directory and listing detail routes now include canonical, Open Graph, and Twitter metadata.
+- Dynamic listing OG image route added at `/listings/[slug]/opengraph-image`.
+- Pilot checklist added at `docs/product/chapter-5-pilot-checklist.md`.
+- Launch-bloom planning draft added at `docs/product/launch-bloom-spec.md`.
+
+Adam live verification:
+
+- First admin bootstrap worked after temporarily disabling `trg_guard_profile_role`, promoting profile role to `admin`, then re-enabling the trigger.
+- `/admin` became accessible to the admin account.
+- Pausing a published Hawa Homestay listing worked.
+- Applying `0011` and restoring Hawa Homestay live worked.
+
+Commands and probes run:
+
+- `npm.cmd run typecheck` - clean.
+- `npm.cmd run lint` - 0 errors, 0 warnings.
+- `npm.cmd test` - 36/36 passing.
+- `npm.cmd audit --audit-level=high` - no high/critical issues; known moderate Next/PostCSS advisory remains with only breaking forced fix.
+- Clean `.next` rebuild with `npm.cmd run build` - clean, 11 routes.
+- `next start -p 3340` smoke: `/` 200, `/listings` 200, `/login` 200, `/admin` 307 unauthenticated redirect, `/listings/hawa-homestay` 200, `/listings/hawa-homestay/opengraph-image` 200 image/png.
+- Metrics live probe: Hawa Homestay `whatsapp_clicks` incremented 0 -> 1 through `/api/listing-metrics` and public Supabase RPC.
+- Metadata probe: Hawa Homestay rendered `og:title`, `og:image`, and canonical tags.
+- `git diff --check` - clean except normal CRLF warnings.
+- `git check-ignore -v .env.local` - `.gitignore:12:.env.*`.
+
+Remaining Chapter 5 review items before `done`:
+
+- Live-test `flag for review`.
+- Live-test `clear to draft`.
+- Inspect `admin_review` rows for pause, publish/restore, needs_review, and clear actions.
+- Refresh owner dashboard and confirm metric counts are visible there after the live metric increment.
+- Accept residual risks for controlled pilot: repeatable public metrics, manual first-admin bootstrap, no image moderation workflow, WhatsApp payment outside platform.
 
 ## Chapter 4 Manual-Action Gate (REQUIRED before any "done" / production claim)
 

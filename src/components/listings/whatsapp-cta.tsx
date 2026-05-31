@@ -1,11 +1,9 @@
 "use client";
 
-import { useCallback } from "react";
 import type { Listing } from "@/types/listings";
 import type { PublicListingOwner } from "@/types/owners";
-import {
-  buildListingWhatsappUrl,
-} from "@/lib/whatsapp";
+import { buildListingWhatsappUrl } from "@/lib/whatsapp";
+import { recordListingMetric } from "@/components/listings/listing-metric-beacon";
 
 /**
  * WhatsApp continuation CTA.
@@ -15,8 +13,8 @@ import {
  * sticky mobile bar is rendered separately so it can sit at the
  * bottom of the page without covering content above the safe area.
  *
- * Click tracking is mock-only in Chapter 2; durable metrics land in
- * Chapter 5 once Supabase is wired.
+ * Click tracking posts a fixed +1 metric to a public route. The DB RPC only
+ * counts published listings and does not expose private owner data.
  */
 interface WhatsappCtaProps {
   listing: Listing;
@@ -27,13 +25,9 @@ interface WhatsappCtaProps {
 export function WhatsappCta({ listing, owner, variant = "inline" }: WhatsappCtaProps) {
   const href = buildListingWhatsappUrl(listing, owner.whatsappNumber);
 
-  const handleClick = useCallback(() => {
-    if (typeof window === "undefined") return;
-    // Mock-only click capture. Replace with durable metrics in Ch5.
-    if (process.env.NODE_ENV !== "production") {
-      console.debug("[whatsapp-cta] click", { listingId: listing.id });
-    }
-  }, [listing.id]);
+  const handleClick = () => {
+    recordListingMetric(listing.id, "whatsapp_clicks");
+  };
 
   if (!href) {
     return (

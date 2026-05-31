@@ -52,7 +52,7 @@ export async function listAllListingsForAdmin(): Promise<AdminListingSummary[]> 
   }));
 }
 
-export type ModerationAction = "pause" | "needs_review" | "clear";
+export type ModerationAction = "pause" | "needs_review" | "publish" | "clear";
 
 export interface ModerationResult {
   ok: boolean;
@@ -76,6 +76,7 @@ function friendlyModerationError(message: string | undefined): string {
  * actor cannot be forged.
  * - pause: published/paused listing -> paused
  * - needs_review: any -> needs_review (admin path in trigger)
+ * - publish: paused/needs_review listing -> published
  * - clear: needs_review -> draft (owner re-publishes after fixing)
  */
 export async function moderateListing(

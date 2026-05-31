@@ -60,8 +60,9 @@ export default async function AdminPage() {
             All listings
           </h1>
           <p className="mt-2 max-w-prose text-base leading-relaxed text-muted-ink">
-            Pause a live listing, flag one for owner review, or clear a flagged
-            listing back to draft. Every action is recorded.
+            Pause a live listing, restore a paused listing, flag one for owner
+            review, or clear a flagged listing back to draft. Every action is
+            recorded.
           </p>
           <dl className="mt-4 flex flex-wrap gap-x-6 gap-y-2 text-sm">
             {(["published", "paused", "needs_review", "draft"] as const).map(

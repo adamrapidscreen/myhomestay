@@ -11,7 +11,12 @@ export interface AdminModerationState {
 }
 
 function parseAction(value: string): ModerationAction | null {
-  if (value === "pause" || value === "needs_review" || value === "clear") {
+  if (
+    value === "pause" ||
+    value === "needs_review" ||
+    value === "publish" ||
+    value === "clear"
+  ) {
     return value;
   }
   return null;
@@ -44,7 +49,9 @@ export async function moderateListingAction(
       ? "paused"
       : action === "needs_review"
         ? "flagged for review"
-        : "cleared to draft";
+        : action === "publish"
+          ? "restored live"
+          : "cleared to draft";
   return {
     ok: true,
     message: `Listing ${label}.${result.error ? ` (${result.error})` : ""}`,
