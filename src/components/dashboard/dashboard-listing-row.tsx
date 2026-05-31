@@ -132,6 +132,12 @@ export function DashboardListingRow({ listing }: DashboardListingRowProps) {
           >
             {next.label}
           </Link>
+          <Link
+            href={`/dashboard/listings/${listing.id}/launch`}
+            className="text-xs text-muted-ink underline-offset-4 hover:text-ink hover:underline"
+          >
+            Launch kit
+          </Link>
           {listing.status === "published" && (
             <Link
               href={`/listings/${listing.slug}`}

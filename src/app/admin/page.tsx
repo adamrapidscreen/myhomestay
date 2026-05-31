@@ -2,9 +2,11 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { requireAdmin } from "@/server/auth";
 import { listAllListingsForAdmin } from "@/server/admin-data";
+import { listListingReportsForAdmin } from "@/server/listing-reports-data";
 import { signOutAction } from "@/app/login/actions";
 import { LISTING_STATUS_DISPLAY } from "@/lib/listing-status-display";
 import { AdminListingRow } from "@/components/admin/admin-listing-row";
+import { AdminReportsSection } from "@/components/admin/admin-reports-section";
 
 export const metadata: Metadata = {
   title: "Admin review",
@@ -13,6 +15,11 @@ export const metadata: Metadata = {
 export default async function AdminPage() {
   const admin = await requireAdmin();
   const listings = await listAllListingsForAdmin();
+  const reports = await listListingReportsForAdmin();
+
+  const listingLookup = Object.fromEntries(
+    listings.map((l) => [l.id, { name: l.name, slug: l.slug }]),
+  );
 
   const counts = listings.reduce<Record<string, number>>((acc, l) => {
     acc[l.status] = (acc[l.status] ?? 0) + 1;
@@ -91,6 +98,8 @@ export default async function AdminPage() {
             ))}
           </ul>
         )}
+
+        <AdminReportsSection reports={reports} listingLookup={listingLookup} />
       </main>
     </div>
   );

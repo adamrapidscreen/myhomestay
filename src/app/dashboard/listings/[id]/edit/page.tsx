@@ -3,9 +3,12 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireOwner } from "@/server/auth";
 import { findListingById, getListingPhotos } from "@/server/listings-data";
+import { listGuideItems } from "@/server/local-guide-data";
 import { getSignedPhotoUrl } from "@/server/listing-photos-storage";
 import { evaluateListingCompleteness } from "@/lib/listing-completeness";
+import { evaluateLaunchChecklist } from "@/lib/launch-checks";
 import { LISTING_STATUS_DISPLAY } from "@/lib/listing-status-display";
+import { LaunchChecklistSummary } from "@/components/dashboard/launch-checklist";
 import { ListingBuilder } from "../../listing-builder";
 import {
   PhotoManager,
@@ -32,6 +35,13 @@ export default async function EditListingPage({ params }: EditListingPageParams)
 
   const completeness = evaluateListingCompleteness(listing);
   const status = LISTING_STATUS_DISPLAY[listing.status];
+
+  const guideItems = await listGuideItems(id);
+  const checklist = evaluateLaunchChecklist({
+    listing,
+    owner,
+    publicGuideItemCount: guideItems.filter((g) => g.isPublic).length,
+  });
 
   const ownerPhotos = await getListingPhotos(id);
   const photos: PhotoManagerItem[] = await Promise.all(
@@ -67,6 +77,18 @@ export default async function EditListingPage({ params }: EditListingPageParams)
           </Link>
         </p>
       </div>
+
+      <section className="rounded-card border border-stone bg-paper p-4 sm:p-5">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <LaunchChecklistSummary result={checklist} />
+          <Link
+            href={`/dashboard/listings/${id}/launch`}
+            className="text-sm font-medium text-river underline-offset-4 hover:underline"
+          >
+            Open launch kit →
+          </Link>
+        </div>
+      </section>
 
       {!completeness.publishable && (
         <section className="rounded-card border border-clay bg-rice p-4 sm:p-5">

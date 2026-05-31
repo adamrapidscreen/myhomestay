@@ -5,12 +5,17 @@ import {
   findPublishedListingBySlug,
   getPublicListingOwner,
 } from "@/server/listings-data";
+import { listPublishedGuideItems } from "@/server/local-guide-data";
 import { getSignedPhotoUrl } from "@/server/listing-photos-storage";
 import { formatLocationDetail } from "@/lib/locations/my";
 import { ListingGallery } from "@/components/listings/listing-gallery";
 import { TrustStrip } from "@/components/listings/trust-strip";
 import { OwnerCard } from "@/components/listings/owner-card";
 import { WhatsappCta } from "@/components/listings/whatsapp-cta";
+import { InquiryCard } from "@/components/listings/inquiry-card";
+import { LocalMiniGuide } from "@/components/listings/local-mini-guide";
+import { ConfidenceStrip } from "@/components/listings/confidence-strip";
+import { ReportListingForm } from "@/components/listings/report-listing-form";
 import { ListingViewBeacon } from "@/components/listings/listing-metric-beacon";
 import { getSiteUrl } from "@/lib/supabase/env";
 
@@ -68,6 +73,8 @@ export default async function ListingDetailPage({ params }: ListingDetailParams)
 
   const owner = await getPublicListingOwner(listing.id);
   if (!owner) notFound();
+
+  const guideItems = await listPublishedGuideItems(listing.id);
 
   // Resolve each stored photo object path to a short-lived signed URL.
   // Anon read is permitted for published listings via migration 0009.
@@ -197,23 +204,21 @@ export default async function ListingDetailPage({ params }: ListingDetailParams)
                 </ul>
               </section>
             )}
+
+            <LocalMiniGuide items={guideItems} />
           </div>
 
           <aside className="md:col-span-5 md:col-start-8">
             <div className="md:sticky md:top-6 md:space-y-4">
+              <ConfidenceStrip
+                listing={listing}
+                hasLocalGuide={guideItems.length > 0}
+              />
               <OwnerCard owner={owner} />
               <div className="rounded-card border border-stone bg-rice p-4 sm:p-5">
-                <p className="text-xs font-medium uppercase tracking-[0.12em] text-muted-ink">
-                  Continue on WhatsApp
-                </p>
-                <p className="mt-2 text-sm text-ink">
-                  Message {owner.displayName} with your dates and group size.
-                  The owner will confirm availability and total price.
-                </p>
-                <div className="mt-4">
-                  <WhatsappCta listing={listing} owner={owner} />
-                </div>
+                <InquiryCard listing={listing} owner={owner} />
               </div>
+              <ReportListingForm listingId={listing.id} />
             </div>
           </aside>
         </div>

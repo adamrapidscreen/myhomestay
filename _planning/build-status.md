@@ -5,11 +5,11 @@ Tracker type: KD Plan & Build Flow pilot
 
 ## Current Focus
 
-Chapter 5 is complete for the controlled-pilot baseline. Minimal admin moderation, durable public metrics, SEO/share metadata, and pilot checklist are implemented and locally verified. Adam live-verified admin access, pause, restore-live, and the remaining admin flow felt correct in manual review. Release marker: Beta 0.16.
+Launch Bloom Pack (Beta 0.17 candidate) is implemented end to end across Work Cards LB-1 through LB-7. All seven features are code-complete and locally verified: typecheck, lint, tests (62), audit (high clean), build (14 routes), and runtime smoke all pass. Migration `0012_launch_bloom_pack.sql` is WRITTEN but NOT applied; Adam applies live SQL manually. Live DB verification and the full responsive browser sweep are pending that apply. Release marker stays Beta 0.16 until Adam decides on the version bump.
 
 ## Next Move
 
-Review and refine `docs/product/launch-bloom-spec.md`, then choose the next launch-bloom implementation slice. Do not start broader launch features until the spec is accepted.
+Adam applies `supabase/migrations/0012_launch_bloom_pack.sql` to live Supabase, then runs the second OpenCode prompt in `_planning/opencode-handoff-launch-bloom.md` for the live verification pass (owner launch checklist, guide persistence, share/QR, public confidence strip, report intake, WhatsApp inquiry). After live verification, decide whether to release as Beta 0.17 and whether to commit/push.
 
 ## Build Chapters
 
@@ -33,6 +33,24 @@ Review and refine `docs/product/launch-bloom-spec.md`, then choose the next laun
 | 5.2 | Durable WhatsApp Metrics | done | local runtime + live metric RPC | `/api/listing-metrics` validates UUID + metric allowlist. Hawa Homestay live WhatsApp clicks incremented 0 -> 1 through local API + public RPC. |
 | 5.3 | SEO And Share Metadata | done | build + runtime metadata probe | Directory/listing canonical, OG, Twitter metadata added. `/listings/hawa-homestay/opengraph-image` returns `200 image/png`. |
 | 5.4 | Security Gate And Pilot Checklist | done | local feature gate + manual acceptance | Typecheck/lint/tests/build clean; high/critical audit clean; `.env.local` ignored. Residual risks accepted for controlled pilot, not production readiness. |
+
+### Launch Bloom Pack (planned)
+
+Source spec: `docs/product/launch-bloom-spec.md`
+
+OpenCode handoff: `_planning/opencode-handoff-launch-bloom.md`
+
+Target release: Beta 0.17 candidate
+
+| Card | Name | Status | Verification Target | Notes |
+| --- | --- | --- | --- | --- |
+| LB-1 | Launch Data Foundation | implemented | migration review + typecheck | `supabase/migrations/0012_launch_bloom_pack.sql` written (NOT applied). Server modules + pure helper + 10 unit tests added. Adam applies live SQL manually. |
+| LB-2 | Owner Trust Checklist | implemented | owner launch page flow | Computed 9-check checklist; evidence-based only, no verified/certified claims. Dashboard row + edit summary + `/launch` route. |
+| LB-3 | Share Kit | implemented | share links + QR surface | Copy/native-share/WhatsApp-share/captions + server-side QR route (`qrcode@1.5.4`, SVG, owner+published only). No client QR bundle weight. |
+| LB-4 | Local Mini-Guide | implemented | owner CRUD + public display | Owner add/delete guide items (RLS-scoped); public grouped rows via column-scoped RPC. |
+| LB-5 | Traveller Confidence Strip And Report Listing | implemented | public listing + report intake | Factual confidence strip; report intake via definer RPC (published-only, no public table insert); admin read-only reports section. |
+| LB-6 | WhatsApp Inquiry Kit | implemented | generated message checks | Inquiry composer builds local message, opens WhatsApp, fires click metric, stores nothing. 6 unit tests. |
+| LB-7 | Polish, QA, And Closeout | implemented | full local verification + responsive sweep | typecheck/lint/test/build/audit clean; smoke probes pass. Live DB + responsive browser sweep pending migration 0012 apply. |
 
 ### Chapter 3 (implemented)
 
@@ -388,6 +406,82 @@ Remaining Chapter 5 review items before `done`:
 - Inspect `admin_review` rows for pause, publish/restore, needs_review, and clear actions.
 - Refresh owner dashboard and confirm metric counts are visible there after the live metric increment.
 - Accept residual risks for controlled pilot: repeatable public metrics, manual first-admin bootstrap, no image moderation workflow, WhatsApp payment outside platform.
+
+### Launch Bloom Pack (2026-06-01)
+
+Files added:
+
+- `supabase/migrations/0012_launch_bloom_pack.sql` - enums (`guide_item_category`, `listing_report_reason`, `listing_report_status`), `listing_guide_items` + `listing_reports` tables, FK/sort indexes, RLS (owner-scoped guide CRUD, admin report read/update), `get_published_listing_guide_items` definer RPC, `submit_listing_report` definer RPC. NOT applied.
+- `src/types/launch.ts` - guide item + report types.
+- `src/lib/local-guide.ts` (+ `.test.ts`) - category labels, normalize/validate. 10 tests.
+- `src/lib/launch-checks.ts` (+ `.test.ts`) - computed 9-check launch checklist. 4 tests.
+- `src/lib/share-copy.ts` (+ `.test.ts`) - public URL, share captions, owner share message. 6 tests.
+- `src/lib/inquiry-message.ts` (+ `.test.ts`) - WhatsApp inquiry composer + owner quick replies. 6 tests.
+- `src/server/local-guide-data.ts` - owner CRUD (RLS) + published-items RPC read.
+- `src/server/listing-reports-data.ts` - report submit via RPC + admin read/count.
+- `src/app/dashboard/listings/[id]/launch/{page,actions}.tsx` - launch kit hub + guide actions.
+- `src/app/dashboard/listings/[id]/qr/route.ts` - server-side QR (owner + published only).
+- `src/app/api/listing-reports/route.ts` - public report intake.
+- `src/components/dashboard/{launch-checklist,share-kit,local-guide-manager}.tsx`.
+- `src/components/listings/{confidence-strip,inquiry-card,local-mini-guide,report-listing-form}.tsx`.
+- `src/components/admin/admin-reports-section.tsx`.
+
+Files modified:
+
+- `src/components/dashboard/dashboard-listing-row.tsx` - added "Launch kit" link.
+- `src/app/dashboard/listings/[id]/edit/page.tsx` - launch summary banner + open launch kit.
+- `src/app/listings/[slug]/page.tsx` - confidence strip, inquiry card (replaces plain CTA card), local mini-guide, report form.
+- `src/app/admin/page.tsx` - listing reports section + listing lookup.
+
+Dependencies: added `qrcode@1.5.4` + `@types/qrcode@1.5.5` (pinned exact). Server-only; not in client bundle. No new audit advisories.
+
+Commands run (static verification only):
+
+- `npm run typecheck` - clean.
+- `npm run lint` - 0 errors, 0 warnings.
+- `npm test` - 7 spec files, 62 tests passing (26 new).
+- `npm audit --audit-level=high` - no high/critical; 2 known moderate postcss/Next advisories remain (accepted, transitive).
+- `npm run build` (clean `.next/`) - 14 routes, 0 errors. New routes `/api/listing-reports` and `/dashboard/listings/[id]/qr` registered.
+- Runtime smoke (`next start -p 3360`): `/` 200, `/listings` 200, `/login` 200, `/admin` 307 unauth redirect.
+- Public-claim guard: `grep "verified|certified|approved by" src` - only comments/docstrings/guard test, no rendered public copy.
+
+NOT verified: no Launch Bloom code has run against live Supabase. The guide CRUD, published-guide RPC, report intake RPC, and RLS are unproven at runtime until migration 0012 is applied. Public listing page degrades gracefully (empty guide) when the RPC is absent, confirmed by smoke probe.
+
+Design decisions matching repo doctrine:
+
+- Public reads use column-scoped definer RPCs, never a broad anon table grant (Chapter 4 M1 / migration 0008 decision).
+- Report intake uses a definer RPC with NO public INSERT policy, mirroring `moderate_listing`/`increment_listing_metric`. Published-only enforced in the DB.
+- Inquiry kit stores nothing; message built client-side, WhatsApp click metric still fires.
+- QR encodes only the public listing URL, never owner contact.
+
+### Launch Bloom Live Verification (2026-06-01, migration 0012 applied)
+
+Adam applied `0012_launch_bloom_pack.sql` to live Supabase. Live pass run against real data:
+
+- `/listings` 200 (public directory RPC).
+- `/listings/hawa-homestay` 200; confidence strip + inquiry card render; `get_published_listing_guide_items` RPC resolves with no error (empty guide as expected, none added yet).
+- `/admin` 307, `/dashboard` 307 (auth guards intact).
+- Report intake RPC (`submit_listing_report`) end to end: valid report -> 200 `{"ok":true}` (row written); bad UUID -> 400; bad reason -> 400.
+- False-alarm root cause: an initial `/` 500 was a corrupted `.next` chunk from killing node mid-run (webpack-runtime `a[d] is not a function`), not a regression. Clean rebuild restored `/` 200 and all routes healthy.
+
+Live data note: the valid-path test created one real `listing_reports` row on Hawa Homestay (reason `misleading`, details "automated launch-bloom verification test"). Dismiss/delete from `/admin` during cleanup.
+
+Still pending an authenticated owner/admin OTP session:
+
+- Owner guide add/edit/delete + cross-owner RLS negative test.
+- Launch checklist live values, share kit, QR route (owner-only).
+- Admin reports visible at `/admin`.
+- WhatsApp inquiry click-metric increment + responsive sweep at 320/375/768/1280.
+
+## Launch Bloom Manual-Action Gate (REQUIRED before any "done" / live claim)
+
+- [ ] Apply `supabase/migrations/0012_launch_bloom_pack.sql` to the Supabase project (SQL editor or `supabase db push`).
+- [ ] Confirm enums, `listing_guide_items`, and `listing_reports` exist with RLS enabled.
+- [ ] Live retest: owner adds a public guide item -> appears on the published listing page; owner B cannot CRUD owner A's guide items (RLS); public cannot select `listing_reports`; report insert for a non-published listing is rejected; QR route rejects unauthenticated and cross-owner access.
+- [ ] Live retest inquiry kit: WhatsApp inquiry opens with generated message; WhatsApp click metric increments; no traveller data stored.
+- [ ] Confirm an admin sees submitted reports at `/admin`.
+- [ ] Responsive browser sweep at 320 / 375 / 768 / 1280 for `/dashboard/listings/[id]/launch`, `/listings/[slug]`, and the report form.
+- [ ] Record live retest evidence here before marking Launch Bloom `done`.
 
 ## Chapter 4 Manual-Action Gate (REQUIRED before any "done" / production claim)
 
